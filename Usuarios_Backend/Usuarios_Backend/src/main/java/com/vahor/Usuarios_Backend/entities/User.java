@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -25,8 +26,10 @@ public class User {
     @Email
     private String email;
     @NotBlank
+    @Size(min = 4, max = 12)
     private String username;
     @NotBlank
+    @Size(min = 8, max = 14)
     private String password;
 
     public Long getId() {
