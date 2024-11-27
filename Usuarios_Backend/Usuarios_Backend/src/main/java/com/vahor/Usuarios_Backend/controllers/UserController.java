@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.vahor.Usuarios_Backend.entities.User;
 import com.vahor.Usuarios_Backend.services.UserService;
+import jakarta.validation.Valid;
 import java.util.Optional;
 import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,7 +45,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody User user, BindingResult result) {
+    public ResponseEntity<?> create(@Valid @RequestBody User user, BindingResult result) {
         if (result.hasErrors()) {
             return validation(result);
         }
@@ -52,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@RequestBody User user, BindingResult result, @PathVariable Long id) {
+    public ResponseEntity<?> update(@Valid @RequestBody User user, BindingResult result, @PathVariable Long id) {
         if (result.hasErrors()) {
             return validation(result);
         }
