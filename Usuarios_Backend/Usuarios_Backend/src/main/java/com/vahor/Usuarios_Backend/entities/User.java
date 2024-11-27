@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import static jakarta.persistence.GenerationType.*;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
 @Entity
@@ -20,6 +21,7 @@ public class User {
     @NotEmpty
     private String lastname;
     @NotEmpty
+    @Email
     private String email;
     @NotEmpty
     private String username;
