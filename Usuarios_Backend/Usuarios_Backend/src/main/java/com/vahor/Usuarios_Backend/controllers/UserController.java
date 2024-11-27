@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.vahor.Usuarios_Backend.entities.User;
 import com.vahor.Usuarios_Backend.services.UserService;
 import java.util.Optional;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.validation.BindingResult;
 
 @RestController
 @RequestMapping("/api/users")
@@ -41,12 +44,18 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
+    public ResponseEntity<?> create(@RequestBody User user, BindingResult result) {
+        if (result.hasErrors()) {
+            return validation(result);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<?> update(@RequestBody User user, BindingResult result, @PathVariable Long id) {
+        if (result.hasErrors()) {
+            return validation(result);
+        }
         Optional<User> userOptional = service.findById(id);
 
         if (userOptional.isPresent()) {
@@ -69,5 +78,13 @@ public class UserController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    private ResponseEntity<?> validation(BindingResult result) {
+        Map<String, String> errors = new HashMap<>();
+        result.getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), "El campo " + error.getField() + " " + error.getDefaultMessage());
+        });
+        return ResponseEntity.badRequest().body(errors);
     }
 }
