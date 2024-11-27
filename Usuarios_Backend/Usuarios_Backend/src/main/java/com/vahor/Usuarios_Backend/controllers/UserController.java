@@ -40,7 +40,7 @@ public class UserController {
                         "El usuario no pudo encontrarse con la id proporcionada: " + id));
     }
 
-    @PostMapping("path")
+    @PostMapping
     public ResponseEntity<User> create(@RequestBody User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(user));
     }
