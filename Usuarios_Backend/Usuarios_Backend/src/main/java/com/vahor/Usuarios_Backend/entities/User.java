@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import static jakarta.persistence.GenerationType.*;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "users")
@@ -14,10 +15,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
+    @NotEmpty
     private String name;
+    @NotEmpty
     private String lastname;
+    @NotEmpty
     private String email;
+    @NotEmpty
     private String username;
+    @NotEmpty
     private String password;
 
     public Long getId() {
