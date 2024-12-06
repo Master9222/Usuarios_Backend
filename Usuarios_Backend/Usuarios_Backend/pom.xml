@@ -14,7 +14,6 @@
 	<version>1.0.0</version>
 	<name>UserAPP</name>
 	<description>Aplicación de Gestión de Usuarios para Grupo VAHOR</description>
-	<packaging>war</packaging> <!-- Cambiado a WAR -->
 	<url>https://www.vahor.com</url>
 	<licenses>
 		<license>
@@ -43,7 +42,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<scope>provided</scope> <!-- Excluir Tomcat embebido -->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -115,13 +113,18 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
-			<!-- Plugin para generar el archivo WAR -->
+			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.1</version>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
 				<configuration>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<finalName>UserAPP-VAHOR</finalName>
+					<archive>
+						<manifest>
+							<mainClass>com.vahor.UserAPP.Application</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 			</plugin>
 		</plugins>
