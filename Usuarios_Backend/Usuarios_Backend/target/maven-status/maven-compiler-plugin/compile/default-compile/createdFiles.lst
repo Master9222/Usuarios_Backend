@@ -4,8 +4,8 @@ com\vahor\Usuarios_Backend\config\SwaggerConfig.class
 com\vahor\Usuarios_Backend\controllers\ErrorController.class
 com\vahor\Usuarios_Backend\repositories\RoleRepository.class
 com\vahor\Usuarios_Backend\models\UserRequest.class
+com\vahor\Usuarios_Backend\UserApp.class
 com\vahor\Usuarios_Backend\services\UserService.class
-com\vahor\Usuarios_Backend\UsuariosBackendApplication.class
 com\vahor\Usuarios_Backend\controllers\GlobalErrorController.class
 com\vahor\Usuarios_Backend\models\IUser.class
 com\vahor\Usuarios_Backend\auth\SpringSecurityConfig.class
