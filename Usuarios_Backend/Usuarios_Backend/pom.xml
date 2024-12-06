@@ -10,26 +10,30 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.vahor</groupId>
-	<artifactId>Usuarios_Backend</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Usuarios_Backend</name>
-	<description>Evidencia Final TPBHT</description>
-	<url />
+	<artifactId>UserAPP</artifactId>
+	<version>1.0.0</version>
+	<name>UserAPP</name>
+	<description>Aplicación de Gestión de Usuarios para Grupo VAHOR</description>
+	<packaging>war</packaging> <!-- Cambiado a WAR -->
+	<url>https://www.vahor.com</url>
 	<licenses>
-		<license />
+		<license>
+			<name>Apache License 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+			<distribution>repo</distribution>
+		</license>
 	</licenses>
 	<developers>
-		<developer />
+		<developer>
+			<id>vahor-dev</id>
+			<name>Equipo de Desarrollo VAHOR</name>
+			<email>devs@vahor.com</email>
+		</developer>
 	</developers>
-	<scm>
-		<connection />
-		<developerConnection />
-		<tag />
-		<url />
-	</scm>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+
 	<dependencies>
 		<!-- Spring Boot dependencies -->
 		<dependency>
@@ -39,6 +43,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<scope>provided</scope> <!-- Excluir Tomcat embebido -->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -104,9 +109,20 @@
 
 	<build>
 		<plugins>
+			<!-- Spring Boot Maven Plugin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<!-- Plugin para generar el archivo WAR -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
