@@ -1,16 +1,16 @@
 package com.vahor.Usuarios_Backend.repositories;
 
-import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.vahor.Usuarios_Backend.entities.User;
 
-public interface UserRepository extends CrudRepository<User, Long> {
+import java.util.Optional;
 
-    Page<User> findAll(Pageable pageable);
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
 
-    Optional<User> findByUsername(String name);
+    // Nuevo método para buscar por email
+    Optional<User> findByEmail(String email);
 }

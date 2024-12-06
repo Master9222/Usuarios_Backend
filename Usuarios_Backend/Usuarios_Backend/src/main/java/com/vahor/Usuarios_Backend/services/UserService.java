@@ -23,4 +23,7 @@ public interface UserService {
     Optional<User> update(UserRequest user, Long id);
 
     void deleteById(Long id);
+
+    // Nuevo método para autenticar usuarios
+    boolean authenticate(String username, String password);
 }

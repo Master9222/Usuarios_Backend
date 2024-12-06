@@ -1,40 +1,21 @@
 package com.vahor.Usuarios_Backend.auth;
 
-import javax.crypto.SecretKey;
-
-import io.jsonwebtoken.Jwts;
-
-import java.util.Arrays;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-
-import com.vahor.Usuarios_Backend.auth.filter.JwtAuthenticationFilter;
-import com.vahor.Usuarios_Backend.auth.filter.JwtValidationFilter;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 
 @Configuration
 public class SpringSecurityConfig {
 
-    @Autowired
-    private AuthenticationConfiguration authenticationConfiguration;
-
     @Bean
-    AuthenticationManager authenticationManager() throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -45,42 +26,34 @@ public class SpringSecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        return http.authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/page/{page}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("USER", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasRole("ADMIN")
-                .anyRequest().authenticated())
-                .cors(cors -> cors.configurationSource(configurationSource()))
-                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                .addFilter(new JwtValidationFilter(authenticationManager()))
-                .csrf(config -> config.disable())
-                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        return http
+                // Configuración de autorización
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/login", "/resources/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/dashboard").authenticated()
+                        .requestMatchers("/users/**").hasRole("ADMIN") // Spring añade automáticamente el prefijo
+                                                                       // "ROLE_"
+                        .requestMatchers("/403").permitAll()
+                        .anyRequest().authenticated())
+                // Configuración del formulario de inicio de sesión
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .failureUrl("/login?error")
+                        .permitAll())
+                // Configuración de cierre de sesión
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll())
+                // Manejo de excepciones
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(new AccessDeniedHandlerImpl())
+                        .accessDeniedPage("/403"))
+                // Deshabilitar CSRF en desarrollo
+                .csrf(csrf -> csrf.disable())
                 .build();
-    }
-
-    @Bean
-    CorsConfigurationSource configurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(Arrays.asList("*"));
-        config.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
-        config.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
-
-    @Bean
-    FilterRegistrationBean<CorsFilter> corsFilter() {
-        FilterRegistrationBean<CorsFilter> corsBean = new FilterRegistrationBean<CorsFilter>(
-                new CorsFilter(this.configurationSource()));
-        corsBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return corsBean;
     }
 }

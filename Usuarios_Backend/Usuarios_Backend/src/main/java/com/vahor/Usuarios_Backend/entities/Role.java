@@ -39,4 +39,8 @@ public class Role {
         this.name = name;
     }
 
+    // Método utilitario para asignar un sufijo único
+    public void appendSuffix(Long id) {
+        this.name = this.name + "_" + id;
+    }
 }

@@ -23,6 +23,9 @@ public class UserRequest implements IUser {
 
     private boolean admin;
 
+    // Nuevo atributo para manejar la contraseña
+    private String password;
+
     public String getName() {
         return name;
     }
@@ -63,4 +66,11 @@ public class UserRequest implements IUser {
         this.admin = admin;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
