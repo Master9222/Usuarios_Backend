@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .admin-container {
+            height: 100vh;
+            display: flex;
+        }
+
+        .admin-image {
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+        }
+
+        .admin-content {
+            background-color: #fff;
+            color: #000;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            width: 75%;
+        }
+
+        h1 {
+            color: #007bff;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: #6c757d;
+            font-size: 1.5rem;
+        }
+
+        .btn-container {
+            margin-top: 20px;
+        }
+
+        .btn-container a {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .clock-calendar-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .clock {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .calendar {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid admin-container">
+        <!-- Imagen (1/3) -->
+        <div class="col-md-4 p-0 admin-image" th:style="'background-image: url(/images/1.jpg);'"></div>
+
+        <!-- Contenido principal (2/3) -->
+        <div class="col-md-8 d-flex flex-column justify-content-center align-items-start">
+            <!-- Encabezado -->
+            <div class="text-center mb-4">
+                <h1>Grupo VAHOR</h1>
+                <h2>Panel de Administración</h2>
+            </div>
+
+            <div class="admin-content">
+                <p class="text-center">Bienvenido, administrador <span th:text="${username}"></span>.</p>
+
+                <!-- Opciones -->
+                <div class="btn-container">
+                    <a class="btn btn-secondary btn-lg mb-3" th:href="@{/dashboard}">Volver al Dashboard</a>
+                    <a class="btn btn-primary btn-lg mb-3" th:href="@{/users}">Gestión de Usuarios</a>
+                </div>
+
+                <!-- Reloj y Calendario -->
+                <div class="clock-calendar-container">
+                    <div class="clock" id="clock"></div>
+                    <div class="calendar" id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script para el reloj y calendario -->
+    <script>
+        function updateClock() {
+            const clockElement = document.getElementById("clock");
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, "0");
+            const minutes = String(now.getMinutes()).padStart(2, "0");
+            const seconds = String(now.getSeconds()).padStart(2, "0");
+            clockElement.textContent = `Hora: ${hours}:${minutes}:${seconds}`;
+        }
+
+        function updateCalendar() {
+            const calendarElement = document.getElementById("calendar");
+            const now = new Date();
+            const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+            const dateString = now.toLocaleDateString("es-ES", options);
+            calendarElement.textContent = `Fecha: ${dateString}`;
+        }
+
+        // Actualizar el reloj y calendario cada segundo
+        setInterval(() => {
+            updateClock();
+            updateCalendar();
+        }, 1000);
+
+        // Inicialización
+        updateClock();
+        updateCalendar();
+    </script>
+</body>
+
+</html>

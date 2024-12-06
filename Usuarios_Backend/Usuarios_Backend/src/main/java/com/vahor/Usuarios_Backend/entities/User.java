@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vahor.Usuarios_Backend.models.IUser;
 
 import jakarta.persistence.Id;
@@ -17,7 +16,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -46,24 +44,24 @@ public class User implements IUser {
     @Size(min = 4, max = 12)
     private String username;
 
-    @Transient
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private boolean admin;
-
     @NotBlank
     private String password;
 
-    @JsonIgnoreProperties({ "handler", "hibernateLazyInitializer" })
+    @JsonIgnoreProperties({ "users" }) // Ignorar la relación inversa para evitar ciclos
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "users_roles", joinColumns = {
-            @JoinColumn(name = "user_id") }, inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = {
-                    @UniqueConstraint(columnNames = { "user_id", "role_id" }) })
-    private List<Role> roles;
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = @UniqueConstraint(columnNames = {
+            "user_id", "role_id" }))
+    private List<Role> roles = new ArrayList<>();
 
+    private boolean enabled = true; // Habilitado por defecto
+    private boolean accountLocked = false; // Desbloqueado por defecto
+
+    // Constructor
     public User() {
         this.roles = new ArrayList<>();
     }
 
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -121,11 +119,25 @@ public class User implements IUser {
     }
 
     public boolean isAdmin() {
-        return admin;
+        if (roles != null) {
+            return roles.stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()));
+        }
+        return false;
     }
 
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
+    public boolean isEnabled() {
+        return enabled;
     }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isAccountLocked() {
+        return accountLocked;
+    }
+
+    public void setAccountLocked(boolean accountLocked) {
+        this.accountLocked = accountLocked;
+    }
 }

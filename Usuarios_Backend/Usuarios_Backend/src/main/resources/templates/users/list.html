@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background-color: #000;
+            /* Fondo negro */
+            color: #fff;
+            /* Texto blanco */
+        }
+
+        .dashboard-image {
+            background-size: cover;
+            background-position: center;
+            min-height: 100%;
+            height: 100vh;
+            border-radius: 10px;
+        }
+
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        table {
+            background-color: #343a40;
+            /* Fondo gris oscuro para la tabla */
+            color: #fff;
+            /* Texto blanco dentro de la tabla */
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #454d55;
+            /* Bordes más claros para mayor visibilidad */
+        }
+
+        table thead {
+            background-color: #495057;
+            /* Fondo más oscuro para el encabezado */
+            color: #fff;
+            /* Texto blanco para el encabezado */
+        }
+
+        table tbody tr:hover {
+            background-color: #495057;
+            /* Color de fondo al pasar el cursor */
+        }
+
+        footer {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Columna de Imagen (1/3) -->
+            <div class="col-md-4 p-0">
+                <div class="dashboard-image" th:style="'background-image: url(/images/1.jpg);'">
+                    <!-- Imagen como fondo -->
+                </div>
+            </div>
+
+            <!-- Columna de Contenido (2/3) -->
+            <div class="col-md-8 content-container">
+                <header>
+                    <h1 class="text-center my-4">Gestión de Usuarios</h1>
+                </header>
+
+                <main class="container">
+                    <section>
+                        <table class="table table-hover table-striped text-white">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre de Usuario</th>
+                                    <th>Email</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="user : ${users}">
+                                    <td th:text="${user.id}"></td>
+                                    <td th:text="${user.username}"></td>
+                                    <td th:text="${user.email}"></td>
+                                    <td>
+                                        <a class="btn btn-primary btn-sm me-2"
+                                            th:href="@{/users/edit/{id}(id=${user.id})}">Editar</a>
+                                        <button class="btn btn-danger btn-sm" type="button"
+                                            onclick="confirmDelete(this)"
+                                            th:data-action="@{/users/delete/{id}(id=${user.id})}">
+                                            Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section class="text-center">
+                        <a class="btn btn-secondary btn-lg mt-3" th:href="@{/users/create}">Crear Nuevo Usuario</a>
+                    </section>
+                </main>
+
+                <footer class="text-center mt-4">
+                    <a class="btn btn-danger btn-lg" th:href="@{/dashboard}">Volver al Dashboard</a>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para el SweetAlert -->
+    <script>
+        function confirmDelete(button) {
+            const actionUrl = button.getAttribute("data-action");
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "No podrás deshacer esta acción",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement("form");
+                    form.method = "POST";
+                    form.action = actionUrl;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
