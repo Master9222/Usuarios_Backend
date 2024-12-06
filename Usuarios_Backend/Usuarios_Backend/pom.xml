@@ -111,9 +111,12 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>com.vahor.Usuarios_Backend.UserApp</mainClass>
+				</configuration>
 			</plugin>
 
-			
+			<!-- Maven Jar Plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -122,7 +125,7 @@
 					<finalName>UserAPP-VAHOR</finalName>
 					<archive>
 						<manifest>
-							<mainClass>com.vahor.UserAPP.Application</mainClass>
+							<mainClass>com.vahor.Usuarios_Backend.UserApp</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
