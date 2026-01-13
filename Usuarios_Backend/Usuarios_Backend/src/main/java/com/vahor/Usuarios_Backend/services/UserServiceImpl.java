@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,10 +54,10 @@ public class UserServiceImpl implements UserService {
         return userOptional;
     }
 
-    @Transactional
+@Transactional
     @Override
     public User save(User user) {
-        user.setRoles(generateUniqueRoles(user));
+        user.setRoles(assignRoles(user));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return repository.save(user);
     }
@@ -77,7 +79,7 @@ public class UserServiceImpl implements UserService {
                 userDb.setPassword(passwordEncoder.encode(user.getPassword()));
             }
 
-            userDb.setRoles(generateUniqueRoles(user));
+            userDb.setRoles(assignRoles(user));
             return Optional.of(repository.save(userDb));
         }
         return Optional.empty();
@@ -87,6 +89,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Long id) {
         repository.deleteById(id);
+    }
+
+@Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> userOptional = repository.findByUsername(username);
+        
+        if (userOptional.isEmpty()) {
+            throw new UsernameNotFoundException("Usuario no encontrado: " + username);
+        }
+        
+        User user = userOptional.get();
+        user.getRoles().size(); // Inicializa los roles para evitar LazyInitializationException
+        
+        return user;
     }
 
     @Override
@@ -99,42 +116,29 @@ public class UserServiceImpl implements UserService {
         return userOptional.map(user -> passwordEncoder.matches(password, user.getPassword())).orElse(false);
     }
 
-    private List<Role> generateUniqueRoles(IUser user) {
+private List<Role> assignRoles(IUser user) {
         List<Role> roles = new ArrayList<>();
-
-        // Generar rol único para "ROLE_USER"
-        Role userRole = createUniqueRole("ROLE_USER");
+        
+        // Buscar o crear rol USER
+        Role userRole = roleRepository.findByName("ROLE_USER")
+                .orElseGet(() -> {
+                    Role newUserRole = new Role();
+                    newUserRole.setName("ROLE_USER");
+                    return roleRepository.save(newUserRole);
+                });
         roles.add(userRole);
-
-        // Generar rol único para "ROLE_ADMIN" si es admin
+        
+        // Añadir rol ADMIN si es admin
         if (user.isAdmin()) {
-            Role adminRole = createUniqueRole("ROLE_ADMIN");
+            Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                    .orElseGet(() -> {
+                        Role newAdminRole = new Role();
+                        newAdminRole.setName("ROLE_ADMIN");
+                        return roleRepository.save(newAdminRole);
+                    });
             roles.add(adminRole);
         }
-
+        
         return roles;
-    }
-
-    private Role createUniqueRole(String baseRoleName) {
-        List<Role> existingRoles = roleRepository.findByNameStartingWith(baseRoleName);
-
-        // Generar un rol único basado en el ID más alto
-        long suffix = existingRoles.stream()
-                .mapToLong(role -> {
-                    String[] parts = role.getName().split("_");
-                    try {
-                        return Long.parseLong(parts[parts.length - 1]);
-                    } catch (NumberFormatException e) {
-                        return 0L; // Si no tiene sufijo, lo considera 0
-                    }
-                })
-                .max()
-                .orElse(0L) + 1;
-
-        String uniqueRoleName = baseRoleName + "_" + suffix;
-
-        // Crear y guardar el rol único
-        Role newRole = new Role(uniqueRoleName);
-        return roleRepository.save(newRole);
     }
 }

@@ -6,11 +6,12 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.vahor.Usuarios_Backend.entities.User;
 import com.vahor.Usuarios_Backend.models.UserRequest;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
 
     List<User> findAll();
 

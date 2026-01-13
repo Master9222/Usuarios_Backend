@@ -1,17 +1,24 @@
 package com.vahor.Usuarios_Backend.auth;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SpringSecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
@@ -27,33 +34,28 @@ public class SpringSecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+                // Deshabilitar CSRF para API REST
+                .csrf(AbstractHttpConfigurer::disable)
                 // Configuración de autorización
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/login", "/resources/**", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/dashboard").authenticated()
-                        .requestMatchers("/users/**").hasRole("ADMIN") // Spring añade automáticamente el prefijo
-                                                                       // "ROLE_"
-                        .requestMatchers("/403").permitAll()
+                        // Endpoints públicos
+                        .requestMatchers("/api/auth/**", "/login", "/resources/**", "/css/**", "/js/**", "/images/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Endpoints para usuarios autenticados
+                        .requestMatchers("/api/dashboard", "/dashboard").authenticated()
+                        // Endpoints para administradores
+                        .requestMatchers("/api/users/**", "/users/**").hasRole("ADMIN")
+                        // Páginas de error
+                        .requestMatchers("/403", "/access-denied").permitAll()
+                        // Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated())
-                // Configuración del formulario de inicio de sesión
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard", true)
-                        .failureUrl("/login?error")
-                        .permitAll())
-                // Configuración de cierre de sesión
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll())
+                // Configuración de sesión sin estado (stateless) para JWT
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Añadir filtro JWT
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 // Manejo de excepciones
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler(new AccessDeniedHandlerImpl())
                         .accessDeniedPage("/403"))
-                // Deshabilitar CSRF en desarrollo
-                .csrf(csrf -> csrf.disable())
                 .build();
     }
 }
